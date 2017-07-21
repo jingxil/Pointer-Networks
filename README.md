@@ -19,6 +19,10 @@ training
 
 $ python convex_hull.py --ARG=VALUE
 
+evaluating
+
+$ python convex_hull.py --forward_only=True --beam_width=VALUE --ARG=VALUE
+
 visualizing
 
 $ tensorboard --logdir=DIR

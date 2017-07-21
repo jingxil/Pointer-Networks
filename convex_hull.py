@@ -10,6 +10,7 @@ tf.app.flags.DEFINE_integer("max_output_sequence_len", 7, "Maximum output sequen
 tf.app.flags.DEFINE_integer("rnn_size", 128, "RNN unit size.")
 tf.app.flags.DEFINE_integer("attention_size", 128, "Attention size.")
 tf.app.flags.DEFINE_integer("num_layers", 1, "Number of layers.")
+tf.app.flags.DEFINE_integer("beam_width", 2, "Width of beam search .")
 tf.app.flags.DEFINE_float("learning_rate", 0.001, "Learning rate.")
 tf.app.flags.DEFINE_float("max_gradient_norm", 5.0, "Maximum gradient norm.")
 tf.app.flags.DEFINE_boolean("forward_only", False, "Forward Only.")
@@ -90,7 +91,8 @@ class ConvexHull(object):
                     max_output_sequence_len=FLAGS.max_output_sequence_len, 
                     rnn_size=FLAGS.rnn_size, 
                     attention_size=FLAGS.attention_size, 
-                    num_layers=FLAGS.num_layers, 
+                    num_layers=FLAGS.num_layers,
+                    beam_width=FLAGS.beam_width, 
                     learning_rate=FLAGS.learning_rate, 
                     max_gradient_norm=FLAGS.max_gradient_norm, 
                     forward_only=self.forward_only)
@@ -145,7 +147,15 @@ class ConvexHull(object):
         step_time, loss = 0.0, 0.0
 
   def eval(self):
-    pass
+    """ Randomly get a batch of data and output predictions """  
+    inputs,enc_input_weights, outputs, dec_input_weights = self.get_batch()
+    predicted_ids = self.model.step(self.sess, inputs, enc_input_weights)    
+    print("="*20)
+    for i in range(FLAGS.batch_size):
+      print("* %dth sample target: %s" % (i,str(outputs[i,1:]-2)))
+      for predict in predicted_ids[i]:
+        print("prediction: "+str(predict))       
+    print("="*20)
 
   def run(self):
     if self.forward_only:
